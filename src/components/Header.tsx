@@ -1,21 +1,38 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ActivitySquare, Home, LogIn, User } from 'lucide-react';
+import { ActivitySquare, Home, LogIn, LogOut, User } from 'lucide-react';
 import { Button } from './ui/button';
 import { 
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
-  NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from '@/lib/utils';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
+import AuthModal from './AuthModal';
 
 const Header = () => {
-  const { user, signIn, signOut } = useGoogleAuth();
+  const { user, signOut } = useGoogleAuth();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const openAuthModal = () => setIsAuthModalOpen(true);
+  const closeAuthModal = () => setIsAuthModalOpen(false);
+
+  // Get first letter of display name for avatar fallback
+  const getInitials = () => {
+    if (!user?.displayName) return 'U';
+    return user.displayName.charAt(0).toUpperCase();
+  };
 
   return (
     <header className="bg-white shadow-sm py-4">
@@ -39,39 +56,33 @@ const Header = () => {
             </nav>
 
             {user ? (
-              <NavigationMenu>
-                <NavigationMenuList>
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar>
                       {user.photoURL ? (
-                        <img 
-                          src={user.photoURL} 
-                          alt={user.displayName || "User"} 
-                          className="w-6 h-6 rounded-full" 
-                        />
+                        <AvatarImage src={user.photoURL} alt={user.displayName || "User"} />
                       ) : (
-                        <User className="h-4 w-4" />
+                        <AvatarFallback>{getInitials()}</AvatarFallback>
                       )}
-                      <span>{user.displayName || user.email}</span>
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <div className="p-4 w-56">
-                        <Button 
-                          variant="outline" 
-                          className="w-full justify-start"
-                          onClick={signOut}
-                        >
-                          ออกจากระบบ
-                        </Button>
-                      </div>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                </NavigationMenuList>
-              </NavigationMenu>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="font-medium">{user.displayName || user.email}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={signOut} className="text-red-500 focus:text-red-500">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    ออกจากระบบ
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Button 
                 variant="outline" 
-                onClick={signIn}
+                onClick={openAuthModal}
                 className="flex items-center gap-2"
               >
                 <LogIn className="h-4 w-4" />
@@ -81,6 +92,8 @@ const Header = () => {
           </div>
         </div>
       </div>
+      
+      <AuthModal isOpen={isAuthModalOpen} onClose={closeAuthModal} />
     </header>
   );
 };
