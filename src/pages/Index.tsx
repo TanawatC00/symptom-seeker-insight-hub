@@ -9,18 +9,18 @@ const Index = () => {
   const features = [
     {
       icon: <CheckCircle2 className="h-8 w-8 text-medical-blue" />,
-      title: 'Symptom Analysis',
-      description: 'Select your symptoms and get a list of possible conditions based on your selection.'
+      title: 'วิเคราะห์อาการ',
+      description: 'เลือกอาการของคุณและรับรายการโรคที่เป็นไปได้ตามอาการที่คุณเลือก'
     },
     {
       icon: <ShieldAlert className="h-8 w-8 text-medical-teal" />,
-      title: 'Self-Care Guidance',
-      description: 'Receive recommendations for managing your symptoms and when to seek professional care.'
+      title: 'คำแนะนำในการดูแลตนเอง',
+      description: 'รับคำแนะนำในการจัดการกับอาการของคุณและเมื่อใดควรพบแพทย์'
     },
     {
       icon: <BookOpen className="h-8 w-8 text-medical-orange" />,
-      title: 'Reliable Information',
-      description: 'Access medical information based on trusted health sources and clinical guidelines.'
+      title: 'ข้อมูลที่น่าเชื่อถือ',
+      description: 'เข้าถึงข้อมูลทางการแพทย์จากแหล่งสุขภาพที่เชื่อถือได้และแนวทางทางคลินิก'
     }
   ];
 
@@ -39,20 +39,20 @@ const Index = () => {
                 </div>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4 text-medical-dark">
-                Understand Your Symptoms
+                เข้าใจอาการของคุณ
               </h1>
               <p className="text-xl text-gray-600 mb-8">
-                Check your symptoms, discover possible causes, and get guidance on next steps.
+                ตรวจสอบอาการของคุณ ค้นพบสาเหตุที่เป็นไปได้ และรับคำแนะนำเกี่ยวกับขั้นตอนต่อไป
               </p>
               <Link 
                 to="/checker" 
                 className="btn-accent inline-flex items-center text-lg px-8 py-3"
               >
-                <span>Start Symptom Check</span>
+                <span>เริ่มการตรวจสอบอาการ</span>
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <p className="text-sm text-gray-500 mt-4">
-                Not a substitute for professional medical advice
+                ไม่ใช่การทดแทนคำแนะนำทางการแพทย์จากผู้เชี่ยวชาญ
               </p>
             </div>
           </div>
@@ -61,7 +61,7 @@ const Index = () => {
         {/* Features section */}
         <section className="py-16 bg-white">
           <div className="container-custom">
-            <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">วิธีการทำงาน</h2>
             
             <div className="grid md:grid-cols-3 gap-8">
               {features.map((feature, index) => (
@@ -81,16 +81,16 @@ const Index = () => {
         <section className="py-16 bg-medical-blue text-white">
           <div className="container-custom">
             <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-4">Ready to check your symptoms?</h2>
+              <h2 className="text-3xl font-bold mb-4">พร้อมที่จะตรวจสอบอาการของคุณหรือไม่?</h2>
               <p className="text-xl opacity-90 mb-8">
-                Our symptom checker helps you understand what might be causing your symptoms 
-                and provides guidance on what to do next.
+                ตัวตรวจสอบอาการของเราช่วยให้คุณเข้าใจสิ่งที่อาจเป็นสาเหตุของอาการของคุณ
+                และให้คำแนะนำเกี่ยวกับสิ่งที่ควรทำต่อไป
               </p>
               <Link 
                 to="/checker" 
                 className="bg-white text-medical-blue hover:bg-gray-100 font-medium py-3 px-8 rounded-lg shadow-sm transition-colors duration-200 inline-flex items-center"
               >
-                <span>Get Started Now</span>
+                <span>เริ่มตอนนี้เลย</span>
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </div>
@@ -102,15 +102,14 @@ const Index = () => {
           <div className="container-custom">
             <div className="max-w-3xl mx-auto">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-semibold mb-4 text-center">Important Disclaimer</h2>
+                <h2 className="text-xl font-semibold mb-4 text-center">ข้อสงวนสิทธิ์ที่สำคัญ</h2>
                 <p className="text-gray-600 mb-4">
-                  SymptomSeeker is designed to provide general information and guidance based on the symptoms you report. 
-                  It is not intended to be a substitute for professional medical advice, diagnosis, or treatment.
+                  SymptomSeeker ถูกออกแบบมาเพื่อให้ข้อมูลทั่วไปและคำแนะนำตามอาการที่คุณรายงาน
+                  ไม่ได้มีวัตถุประสงค์เพื่อทดแทนคำแนะนำทางการแพทย์ การวินิจฉัย หรือการรักษาจากผู้เชี่ยวชาญ
                 </p>
                 <p className="text-gray-600">
-                  Always seek the advice of your physician or other qualified health provider with any questions you may have 
-                  regarding a medical condition. Never disregard professional medical advice or delay in seeking it because 
-                  of something you have read on this website.
+                  ควรขอคำแนะนำจากแพทย์หรือผู้ให้บริการด้านสุขภาพที่มีคุณสมบัติเหมาะสมเสมอหากคุณมีคำถามเกี่ยวกับสภาพทางการแพทย์
+                  อย่าละเลยคำแนะนำทางการแพทย์จากผู้เชี่ยวชาญหรือชะลอการขอรับคำปรึกษาเนื่องจากสิ่งที่คุณอ่านบนเว็บไซต์นี้
                 </p>
               </div>
             </div>

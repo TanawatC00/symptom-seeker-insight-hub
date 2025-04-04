@@ -18,13 +18,13 @@ const Header = () => {
               <li>
                 <Link to="/" className="flex items-center gap-1 text-gray-600 hover:text-medical-blue transition-colors">
                   <Home className="h-4 w-4" />
-                  <span>Home</span>
+                  <span>หน้าหลัก</span>
                 </Link>
               </li>
               <li>
                 <Link to="/checker" className="flex items-center gap-1 text-gray-600 hover:text-medical-blue transition-colors">
                   <AlertCircle className="h-4 w-4" />
-                  <span>Symptom Checker</span>
+                  <span>ตรวจสอบอาการ</span>
                 </Link>
               </li>
             </ul>

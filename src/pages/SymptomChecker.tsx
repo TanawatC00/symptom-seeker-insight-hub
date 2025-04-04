@@ -42,6 +42,17 @@ const SymptomChecker = () => {
     return symptoms.filter(s => s.category === category).length;
   };
 
+  // Thai translations for category names
+  const categoryTranslations: Record<SymptomCategory | 'All', string> = {
+    'All': 'ทั้งหมด',
+    'General': 'ทั่วไป',
+    'Head': 'ศีรษะ',
+    'Respiratory': 'ระบบหายใจ',
+    'Digestive': 'ระบบย่อยอาหาร',
+    'Musculoskeletal': 'กล้ามเนื้อและกระดูก',
+    'Skin': 'ผิวหนัง'
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -49,9 +60,9 @@ const SymptomChecker = () => {
       <main className="flex-grow bg-medical-light">
         <div className="container-custom py-8">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold text-center mb-2">Symptom Checker</h1>
+            <h1 className="text-3xl font-bold text-center mb-2">ตรวจสอบอาการ</h1>
             <p className="text-gray-600 text-center mb-8">
-              Select all the symptoms you're experiencing to find possible conditions.
+              เลือกอาการทั้งหมดที่คุณกำลังประสบเพื่อค้นหาโรคที่เป็นไปได้
             </p>
             
             {/* Search bar */}
@@ -62,7 +73,7 @@ const SymptomChecker = () => {
               <input
                 type="text"
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-medical-blue focus:border-transparent"
-                placeholder="Search symptoms..."
+                placeholder="ค้นหาอาการ..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -80,7 +91,7 @@ const SymptomChecker = () => {
                       : 'bg-white text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  {category} ({categorySymptomCount(category)})
+                  {categoryTranslations[category]} ({categorySymptomCount(category)})
                 </button>
               ))}
             </div>
@@ -98,7 +109,7 @@ const SymptomChecker = () => {
                 ))
               ) : (
                 <div className="col-span-full text-center py-8 text-gray-500">
-                  No symptoms match your search criteria.
+                  ไม่พบอาการที่ตรงกับเกณฑ์การค้นหาของคุณ
                 </div>
               )}
             </div>
@@ -112,14 +123,14 @@ const SymptomChecker = () => {
                   selectedSymptoms.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
-                <span>Check Possible Conditions</span>
+                <span>ตรวจสอบโรคที่เป็นไปได้</span>
                 <ArrowRight className="ml-2 h-4 w-4" />
               </button>
               
               <p className="text-sm text-gray-500 mt-2">
                 {selectedSymptoms.length === 0 
-                  ? 'Please select at least one symptom' 
-                  : `${selectedSymptoms.length} symptom${selectedSymptoms.length > 1 ? 's' : ''} selected`}
+                  ? 'กรุณาเลือกอย่างน้อยหนึ่งอาการ' 
+                  : `เลือก ${selectedSymptoms.length} อาการ`}
               </p>
             </div>
           </div>

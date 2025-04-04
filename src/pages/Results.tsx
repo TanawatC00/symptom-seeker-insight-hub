@@ -41,8 +41,8 @@ const Results = () => {
         <main className="flex-grow bg-medical-light flex items-center justify-center">
           <div className="text-center">
             <div className="inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-medical-blue border-r-transparent mb-4"></div>
-            <h2 className="text-xl font-medium text-gray-700">Analyzing your symptoms...</h2>
-            <p className="text-gray-500 mt-2">This may take a moment</p>
+            <h2 className="text-xl font-medium text-gray-700">กำลังวิเคราะห์อาการของคุณ...</h2>
+            <p className="text-gray-500 mt-2">อาจใช้เวลาสักครู่</p>
           </div>
         </main>
         <Footer />
@@ -51,10 +51,10 @@ const Results = () => {
   }
 
   const generalAdvice = [
-    "Stay hydrated by drinking plenty of water",
-    "Get adequate rest to help your body recover",
-    "Monitor your symptoms and note any changes",
-    "Avoid strenuous activities while recovering"
+    "ดื่มน้ำให้เพียงพอเพื่อรักษาความชุ่มชื้น",
+    "พักผ่อนให้เพียงพอเพื่อช่วยให้ร่างกายฟื้นตัว",
+    "ติดตามอาการของคุณและบันทึกการเปลี่ยนแปลงใดๆ",
+    "หลีกเลี่ยงกิจกรรมที่ต้องออกแรงมากระหว่างการฟื้นตัว"
   ];
 
   return (
@@ -67,25 +67,25 @@ const Results = () => {
             <div className="mb-6">
               <Link to="/checker" className="inline-flex items-center text-medical-blue hover:underline">
                 <ArrowLeft className="h-4 w-4 mr-1" />
-                <span>Back to Symptom Checker</span>
+                <span>กลับไปยังตัวตรวจสอบอาการ</span>
               </Link>
             </div>
             
-            <h1 className="text-3xl font-bold mb-2">Your Results</h1>
+            <h1 className="text-3xl font-bold mb-2">ผลลัพธ์ของคุณ</h1>
             <p className="text-gray-600 mb-6">
-              Based on your reported symptoms: {selectedSymptomNames.join(', ')}
+              จากอาการที่คุณรายงาน: {selectedSymptomNames.join(', ')}
             </p>
             
             <InfoCard
-              title="Medical Disclaimer"
-              description="This tool provides general information and is not a substitute for professional medical advice. The results are based on commonly reported symptoms and should not be used for self-diagnosis."
+              title="ข้อสงวนสิทธิ์ทางการแพทย์"
+              description="เครื่องมือนี้ให้ข้อมูลทั่วไปและไม่ใช่การทดแทนคำแนะนำทางการแพทย์จากผู้เชี่ยวชาญ ผลลัพธ์อิงตามอาการที่รายงานบ่อยและไม่ควรใช้เพื่อการวินิจฉัยตนเอง"
               type="warning"
             />
             
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
                 <Stethoscope className="h-5 w-5 mr-2 text-medical-blue" />
-                Possible Conditions
+                โรคที่เป็นไปได้
               </h2>
               
               {possibleConditions.length > 0 ? (
@@ -95,7 +95,7 @@ const Results = () => {
                       <h3 className="font-medium text-lg text-medical-blue">{condition.name}</h3>
                       <p className="text-gray-600 mt-1 mb-3">{condition.description}</p>
                       
-                      <h4 className="font-medium text-gray-700 mt-3">Self-Care Recommendations:</h4>
+                      <h4 className="font-medium text-gray-700 mt-3">คำแนะนำในการดูแลตนเอง:</h4>
                       <ul className="mt-1 space-y-1">
                         {condition.selfCare.map((item, index) => (
                           <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
@@ -108,7 +108,7 @@ const Results = () => {
                       <div className="mt-3 pt-3 border-t border-gray-100">
                         <h4 className="font-medium text-amber-600 flex items-center">
                           <AlertTriangle className="h-4 w-4 mr-1" />
-                          When to See a Doctor:
+                          เมื่อใดควรพบแพทย์:
                         </h4>
                         <p className="text-sm text-gray-600 mt-1">{condition.whenToSeeDoctor}</p>
                       </div>
@@ -117,8 +117,8 @@ const Results = () => {
                 </div>
               ) : (
                 <div className="text-center py-6 text-gray-500">
-                  <p>No specific conditions match your symptoms.</p>
-                  <p className="mt-2">This may be due to limited symptom information or your symptoms may be related to a condition not in our database.</p>
+                  <p>ไม่พบโรคที่ตรงกับอาการของคุณ</p>
+                  <p className="mt-2">อาจเป็นเพราะข้อมูลอาการที่จำกัดหรืออาการของคุณอาจเกี่ยวข้องกับโรคที่ไม่มีในฐานข้อมูลของเรา</p>
                 </div>
               )}
             </div>
@@ -126,24 +126,24 @@ const Results = () => {
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
               <h2 className="text-xl font-semibold mb-4 flex items-center">
                 <Heart className="h-5 w-5 mr-2 text-medical-teal" />
-                General Health Advice
+                คำแนะนำสุขภาพทั่วไป
               </h2>
               
               <InfoCard
-                title="Basic Self-Care Recommendations"
+                title="คำแนะนำในการดูแลตนเองขั้นพื้นฐาน"
                 items={generalAdvice}
                 type="success"
               />
               
               <InfoCard
-                title="When to Seek Medical Attention"
-                description="Contact a healthcare provider if you experience any of the following:"
+                title="เมื่อใดควรขอความช่วยเหลือทางการแพทย์"
+                description="ติดต่อผู้ให้บริการด้านสุขภาพหากคุณมีอาการใดต่อไปนี้:"
                 items={[
-                  "Severe pain or symptoms that worsen significantly",
-                  "Difficulty breathing or shortness of breath",
-                  "High fever above 103°F (39.4°C) that doesn't respond to medication",
-                  "Symptoms that persist for more than 7 days",
-                  "Symptoms that significantly impact your daily activities"
+                  "อาการปวดรุนแรงหรืออาการที่แย่ลงอย่างมีนัยสำคัญ",
+                  "หายใจลำบากหรือหายใจถี่",
+                  "มีไข้สูงเกิน 39.4°C ที่ไม่ตอบสนองต่อยา",
+                  "อาการที่ยังคงอยู่นานกว่า 7 วัน",
+                  "อาการที่ส่งผลกระทบอย่างมากต่อกิจกรรมประจำวันของคุณ"
                 ]}
                 type="warning"
               />
@@ -151,7 +151,7 @@ const Results = () => {
             
             <div className="text-center mt-8">
               <Link to="/checker" className="btn-primary">
-                Check Different Symptoms
+                ตรวจสอบอาการอื่น
               </Link>
             </div>
           </div>
