@@ -1,9 +1,10 @@
-
 export interface Symptom {
   id: string;
   name: string;
+  nameThai?: string;
   category: SymptomCategory;
   description: string;
+  descriptionThai?: string;
 }
 
 export type SymptomCategory = 
@@ -19,160 +20,207 @@ export const symptoms: Symptom[] = [
   {
     id: 'fever',
     name: 'Fever',
+    nameThai: 'ไข้',
     category: 'General',
-    description: 'Elevated body temperature above 100.4°F (38°C)'
+    description: 'Elevated body temperature above 100.4°F (38°C)',
+    descriptionThai: 'อุณหภูมิร่างกายสูงกว่า 38°C'
   },
   {
     id: 'fatigue',
     name: 'Fatigue',
+    nameThai: 'อ่อนเพลีย',
     category: 'General',
-    description: 'Feeling of tiredness or lack of energy'
+    description: 'Feeling of tiredness or lack of energy',
+    descriptionThai: 'รู้สึกเหนื่อยล้าหรือขาดพลังงาน'
   },
   {
     id: 'chills',
     name: 'Chills',
+    nameThai: 'หนาวสั่น',
     category: 'General',
-    description: 'Feeling of coldness with shivering or shaking'
+    description: 'Feeling of coldness with shivering or shaking',
+    descriptionThai: 'รู้สึกหนาวสั่นหรือตัวสั่น'
   },
   {
     id: 'weakness',
     name: 'Weakness',
+    nameThai: 'อ่อนแรง',
     category: 'General',
-    description: 'Reduced strength or energy'
+    description: 'Reduced strength or energy',
+    descriptionThai: 'กำลังหรือพลังงานลดลง'
   },
 
   // Head symptoms
   {
     id: 'headache',
     name: 'Headache',
+    nameThai: 'ปวดศีรษะ',
     category: 'Head',
-    description: 'Pain in any region of the head'
+    description: 'Pain in any region of the head',
+    descriptionThai: 'อาการปวดในบริเวณศีรษะ'
   },
   {
     id: 'dizziness',
     name: 'Dizziness',
+    nameThai: 'วิงเวียนศีรษะ',
     category: 'Head',
-    description: 'Feeling lightheaded or unsteady'
+    description: 'Feeling lightheaded or unsteady',
+    descriptionThai: 'รู้สึกมึนงงหรือทรงตัวไม่มั่นคง'
   },
   {
     id: 'sore_throat',
     name: 'Sore Throat',
+    nameThai: 'เจ็บคอ',
     category: 'Head',
-    description: 'Pain or scratchiness in the throat'
+    description: 'Pain or scratchiness in the throat',
+    descriptionThai: 'อาการเจ็บหรือระคายเคืองในลำคอ'
   },
   {
     id: 'runny_nose',
     name: 'Runny Nose',
+    nameThai: 'น้ำมูกไหล',
     category: 'Head',
-    description: 'Excess drainage from the nose'
+    description: 'Excess drainage from the nose',
+    descriptionThai: 'มีน้ำมูกไหลออกจากจมูกมากผิดปกติ'
   },
 
   // Respiratory symptoms
   {
     id: 'cough',
     name: 'Cough',
+    nameThai: 'ไอ',
     category: 'Respiratory',
-    description: 'Sudden expulsion of air from the lungs'
+    description: 'Sudden expulsion of air from the lungs',
+    descriptionThai: 'การขับอากาศออกจากปอดอย่างกะทันหัน'
   },
   {
     id: 'shortness_of_breath',
     name: 'Shortness of Breath',
+    nameThai: 'หายใจลำบาก',
     category: 'Respiratory',
-    description: 'Difficulty breathing or feeling breathless'
+    description: 'Difficulty breathing or feeling breathless',
+    descriptionThai: 'หายใจลำบากหรือรู้สึกหายใจไม่อิ่ม'
   },
   {
     id: 'chest_pain',
     name: 'Chest Pain',
+    nameThai: 'เจ็บหน้าอก',
     category: 'Respiratory',
-    description: 'Discomfort or pain in the chest area'
+    description: 'Discomfort or pain in the chest area',
+    descriptionThai: 'อาการไม่สบายหรือเจ็บปวดบริเวณหน้าอก'
   },
   {
     id: 'wheezing',
     name: 'Wheezing',
+    nameThai: 'หายใจมีเสียงหวีด',
     category: 'Respiratory',
-    description: 'High-pitched whistling sound when breathing'
+    description: 'High-pitched whistling sound when breathing',
+    descriptionThai: 'มีเสียงหวีดเวลาหายใจ'
   },
 
   // Digestive symptoms
   {
     id: 'nausea',
     name: 'Nausea',
+    nameThai: 'คลื่นไส้',
     category: 'Digestive',
-    description: 'Feeling of discomfort in the stomach with an urge to vomit'
+    description: 'Feeling of discomfort in the stomach with an urge to vomit',
+    descriptionThai: 'รู้สึกไม่สบายท้องและอยากอาเจียน'
   },
   {
     id: 'vomiting',
     name: 'Vomiting',
+    nameThai: 'อาเจียน',
     category: 'Digestive',
-    description: 'Forceful expulsion of stomach contents through the mouth'
+    description: 'Forceful expulsion of stomach contents through the mouth',
+    descriptionThai: 'การขับเอาสิ่งที่อยู่ในกระเพาะออกมาทางปาก'
   },
   {
     id: 'diarrhea',
     name: 'Diarrhea',
+    nameThai: 'ท้องเสีย',
     category: 'Digestive',
-    description: 'Loose, watery bowel movements'
+    description: 'Loose, watery bowel movements',
+    descriptionThai: 'อุจจาระเหลวหรือมีน้ำมาก'
   },
   {
     id: 'abdominal_pain',
     name: 'Abdominal Pain',
+    nameThai: 'ปวดท้อง',
     category: 'Digestive',
-    description: 'Pain felt between the chest and pelvic regions'
+    description: 'Pain felt between the chest and pelvic regions',
+    descriptionThai: 'อาการปวดบริเวณระหว่างหน้าอกและกระดูกเชิงกราน'
   },
 
   // Musculoskeletal symptoms
   {
     id: 'joint_pain',
     name: 'Joint Pain',
+    nameThai: 'ปวดข้อ',
     category: 'Musculoskeletal',
-    description: 'Discomfort in one or more joints'
+    description: 'Discomfort in one or more joints',
+    descriptionThai: 'อาการไม่สบายในข้อต่อหนึ่งข้อหรือมากกว่า'
   },
   {
     id: 'muscle_pain',
     name: 'Muscle Pain',
+    nameThai: 'ปวดกล้ามเนื้อ',
     category: 'Musculoskeletal',
-    description: 'Aching or soreness in muscles'
+    description: 'Aching or soreness in muscles',
+    descriptionThai: 'อาการปวดหรือเจ็บในกล้ามเนื้อ'
   },
   {
     id: 'back_pain',
     name: 'Back Pain',
+    nameThai: 'ปวดหลัง',
     category: 'Musculoskeletal',
-    description: 'Discomfort in the back area'
+    description: 'Discomfort in the back area',
+    descriptionThai: 'อาการไม่สบายบริเวณหลัง'
   },
   {
     id: 'stiffness',
     name: 'Stiffness',
+    nameThai: 'ข้อติด',
     category: 'Musculoskeletal',
-    description: 'Difficulty moving joints or muscles'
+    description: 'Difficulty moving joints or muscles',
+    descriptionThai: 'เคลื่อนไหวข้อต่อหรือกล้ามเนื้อลำบาก'
   },
 
   // Skin symptoms
   {
     id: 'rash',
     name: 'Rash',
+    nameThai: 'ผื่น',
     category: 'Skin',
-    description: 'Abnormal change in skin color or texture'
+    description: 'Abnormal change in skin color or texture',
+    descriptionThai: 'การเปลี่ยนแปลงสีหรือพื้นผิวของผิวหนังที่ผิดปกติ'
   },
   {
     id: 'itching',
     name: 'Itching',
+    nameThai: 'คัน',
     category: 'Skin',
-    description: 'Irritating sensation that causes a desire to scratch'
+    description: 'Irritating sensation that causes a desire to scratch',
+    descriptionThai: 'ความรู้สึกระคายเคืองที่ทำให้อยากเกา'
   },
   {
     id: 'swelling',
     name: 'Swelling',
+    nameThai: 'บวม',
     category: 'Skin',
-    description: 'Enlargement or puffiness of body tissue'
+    description: 'Enlargement or puffiness of body tissue',
+    descriptionThai: 'อาการบวมหรือพองของเนื้อเยื่อร่างกาย'
   },
   {
     id: 'skin_discoloration',
     name: 'Skin Discoloration',
+    nameThai: 'ผิวหนังเปลี่ยนสี',
     category: 'Skin',
-    description: 'Abnormal change in skin color'
+    description: 'Abnormal change in skin color',
+    descriptionThai: 'การเปลี่ยนแปลงสีผิวที่ผิดปกติ'
   }
 ];
 
-// Common conditions and their associated symptoms
 export interface Condition {
   id: string;
   name: string;
@@ -250,7 +298,6 @@ export const conditions: Condition[] = [
   }
 ];
 
-// Helper function to match symptoms to possible conditions
 export const findPossibleConditions = (selectedSymptoms: string[]): Condition[] => {
   if (selectedSymptoms.length === 0) return [];
   

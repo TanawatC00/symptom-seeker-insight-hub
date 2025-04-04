@@ -21,8 +21,8 @@ const SymptomCard: React.FC<SymptomCardProps> = ({ symptom, isSelected, onToggle
     >
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-medium text-gray-900">{symptom.name}</h3>
-          <p className="text-sm text-gray-500 mt-1">{symptom.description}</p>
+          <h3 className="font-medium text-gray-900">{symptom.nameThai || symptom.name}</h3>
+          <p className="text-sm text-gray-500 mt-1">{symptom.descriptionThai || symptom.description}</p>
         </div>
         <div className={`h-5 w-5 rounded-full flex items-center justify-center ${
           isSelected ? 'bg-medical-blue text-white' : 'bg-gray-100'
