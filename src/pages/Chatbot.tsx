@@ -57,6 +57,7 @@ const Chatbot = () => {
     setIsLoading(true);
 
     try {
+      console.log('Sending request to OpenAI API...');
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -64,7 +65,7 @@ const Chatbot = () => {
           'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: 'gpt-4o-mini',
           messages: [
             {
               role: 'system',
@@ -84,11 +85,35 @@ const Chatbot = () => {
         })
       });
 
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to get response from OpenAI');
+        const errorData = await response.json();
+        console.error('OpenAI API Error:', errorData);
+        
+        // Handle specific error types
+        if (response.status === 429) {
+          if (errorData.error?.code === 'insufficient_quota') {
+            throw new Error('คุณไม่มี credit เหลือใน OpenAI account กรุณาเติม credit หรือตรวจสอบ billing plan ของคุณ');
+          } else {
+            throw new Error('คำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่');
+          }
+        } else if (response.status === 401) {
+          throw new Error('API Key ไม่ถูกต้อง กรุณาตรวจสอบ API Key ของคุณ');
+        } else if (response.status === 400) {
+          throw new Error('คำขอไม่ถูกต้อง กรุณาลองใหม่');
+        } else {
+          throw new Error(`เกิดข้อผิดพลาด: ${errorData.error?.message || 'ไม่ทราบสาเหตุ'}`);
+        }
       }
 
       const data = await response.json();
+      console.log('OpenAI Response:', data);
+      
+      if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+        throw new Error('ได้รับข้อมูลที่ไม่ถูกต้องจาก OpenAI');
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: data.choices[0].message.content,
@@ -99,7 +124,8 @@ const Chatbot = () => {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
-      toast.error('เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง');
+      const errorMessage = error instanceof Error ? error.message : 'เกิดข้อผิดพลาดในการส่งข้อความ กรุณาลองใหม่อีกครั้ง';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
