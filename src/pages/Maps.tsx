@@ -1,11 +1,10 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import LocationSearch from '../components/LocationSearch';
-import { MapPin, Navigation, Hospital } from 'lucide-react';
+import { MapPin, Navigation, Hospital, Search } from 'lucide-react';
 
 // Fix for default markers in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
