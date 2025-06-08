@@ -1,10 +1,11 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import LocationSearch from '../components/LocationSearch';
-import { MapPin, Navigation, Hospital, Search } from 'lucide-react';
+import { MapPin, Navigation, Hospital, Search, Building } from 'lucide-react';
 
 // Fix for default markers in Leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -24,11 +25,22 @@ const hospitalIcon = L.icon({
   shadowSize: [41, 41]
 });
 
-interface Hospital {
+// Create custom green icon for clinics
+const clinicIcon = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+interface HealthFacility {
   name: string;
   lat: number;
   lng: number;
   distance?: number;
+  type: 'hospital' | 'clinic';
 }
 
 const Maps = () => {
@@ -36,7 +48,7 @@ const Maps = () => {
   const mapInstance = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, name: string} | null>(null);
-  const [nearbyHospitals, setNearbyHospitals] = useState<Hospital[]>([]);
+  const [nearbyFacilities, setNearbyFacilities] = useState<HealthFacility[]>([]);
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
@@ -93,8 +105,8 @@ const Maps = () => {
             .bindPopup('ตำแหน่งปัจจุบันของคุณ')
             .openPopup();
 
-          // Search for hospitals near current location
-          searchNearbyHospitals(latitude, longitude);
+          // Search for health facilities near current location
+          searchNearbyHealthFacilities(latitude, longitude);
         },
         (error) => {
           console.error('Error getting location:', error);
@@ -119,44 +131,96 @@ const Maps = () => {
     return distance;
   };
 
-  const searchNearbyHospitals = async (lat: number, lng: number) => {
+  const searchNearbyHealthFacilities = async (lat: number, lng: number) => {
     try {
-      const response = await fetch(
+      // Search for hospitals
+      const hospitalResponse = await fetch(
         `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["amenity"="hospital"](around:30000,${lat},${lng});way["amenity"="hospital"](around:30000,${lat},${lng});relation["amenity"="hospital"](around:30000,${lat},${lng}););out center;`
       );
-      const data = await response.json();
-      
-      const hospitals: Hospital[] = data.elements.map((element: any) => {
-        const hospitalLat = element.lat || element.center?.lat;
-        const hospitalLng = element.lon || element.center?.lon;
-        const distance = calculateDistance(lat, lng, hospitalLat, hospitalLng);
-        
-        return {
-          name: element.tags?.name || 'โรงพยาบาลไม่ระบุชื่อ',
-          lat: hospitalLat,
-          lng: hospitalLng,
-          distance: distance
-        };
-      }).filter((hospital: Hospital) => hospital.distance <= 30);
+      const hospitalData = await hospitalResponse.json();
 
-      setNearbyHospitals(hospitals);
+      // Search for clinics and health centers
+      const clinicResponse = await fetch(
+        `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["amenity"="clinic"](around:30000,${lat},${lng});way["amenity"="clinic"](around:30000,${lat},${lng});relation["amenity"="clinic"](around:30000,${lat},${lng});node["healthcare"="centre"](around:30000,${lat},${lng});way["healthcare"="centre"](around:30000,${lat},${lng}););out center;`
+      );
+      const clinicData = await clinicResponse.json();
       
-      // Clear existing hospital markers
+      const facilities: HealthFacility[] = [];
+
+      // Process hospitals
+      hospitalData.elements.forEach((element: any) => {
+        const facilityLat = element.lat || element.center?.lat;
+        const facilityLng = element.lon || element.center?.lon;
+        if (facilityLat && facilityLng) {
+          const distance = calculateDistance(lat, lng, facilityLat, facilityLng);
+          
+          facilities.push({
+            name: element.tags?.name || 'โรงพยาบาลไม่ระบุชื่อ',
+            lat: facilityLat,
+            lng: facilityLng,
+            distance: distance,
+            type: 'hospital'
+          });
+        }
+      });
+
+      // Process clinics
+      clinicData.elements.forEach((element: any) => {
+        const facilityLat = element.lat || element.center?.lat;
+        const facilityLng = element.lon || element.center?.lon;
+        if (facilityLat && facilityLng) {
+          const distance = calculateDistance(lat, lng, facilityLat, facilityLng);
+          
+          facilities.push({
+            name: element.tags?.name || 'คลินิกไม่ระบุชื่อ',
+            lat: facilityLat,
+            lng: facilityLng,
+            distance: distance,
+            type: 'clinic'
+          });
+        }
+      });
+
+      // Sort by distance (closest first)
+      facilities.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+      
+      setNearbyFacilities(facilities);
+      
+      // Clear existing markers
       markersRef.current.forEach(marker => {
         mapInstance.current?.removeLayer(marker);
       });
       markersRef.current = [];
 
-      // Add new hospital markers
-      hospitals.forEach(hospital => {
-        const marker = L.marker([hospital.lat, hospital.lng], { icon: hospitalIcon })
+      // Add new markers
+      facilities.forEach(facility => {
+        const icon = facility.type === 'hospital' ? hospitalIcon : clinicIcon;
+        const facilityType = facility.type === 'hospital' ? 'โรงพยาบาล' : 'คลินิก/ศูนย์สุขภาพ';
+        
+        const marker = L.marker([facility.lat, facility.lng], { icon })
           .addTo(mapInstance.current!)
-          .bindPopup(`<strong>${hospital.name}</strong><br>ระยะทาง: ${hospital.distance?.toFixed(1)} กม.`);
+          .bindPopup(`
+            <div style="min-width: 200px;">
+              <strong>${facility.name}</strong><br>
+              <small style="color: #666;">${facilityType}</small><br>
+              <span style="color: #0066cc;">ระยะทาง: ${facility.distance?.toFixed(1)} กม.</span><br>
+              <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${facility.lat},${facility.lng}', '_blank')" 
+                      style="margin-top: 8px; padding: 4px 8px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                นำทาง
+              </button>
+            </div>
+          `);
+        
+        // Add click event to center map on marker
+        marker.on('click', () => {
+          mapInstance.current?.setView([facility.lat, facility.lng], 16);
+        });
+        
         markersRef.current.push(marker);
       });
 
     } catch (error) {
-      console.error('Error searching hospitals:', error);
+      console.error('Error searching health facilities:', error);
     }
   };
 
@@ -175,8 +239,25 @@ const Maps = () => {
       .bindPopup(`<strong>ตำแหน่งที่เลือก</strong><br>${placeName}`)
       .openPopup();
 
-    // Search for nearby hospitals
-    searchNearbyHospitals(lat, lng);
+    // Search for nearby health facilities
+    searchNearbyHealthFacilities(lat, lng);
+  };
+
+  const handleFacilityClick = (facility: HealthFacility) => {
+    if (!mapInstance.current) return;
+    
+    // Center map on the facility and zoom in
+    mapInstance.current.setView([facility.lat, facility.lng], 16);
+    
+    // Find and open the popup for this facility
+    const marker = markersRef.current.find(m => {
+      const pos = m.getLatLng();
+      return Math.abs(pos.lat - facility.lat) < 0.0001 && Math.abs(pos.lng - facility.lng) < 0.0001;
+    });
+    
+    if (marker) {
+      marker.openPopup();
+    }
   };
 
   return (
@@ -189,7 +270,7 @@ const Maps = () => {
             <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 gap-4">
               <div>
                 <h1 className="text-3xl font-bold text-medical-dark">แผนที่สถานพยาบาล</h1>
-                <p className="text-gray-600">ค้นหาสถานพยาบาลและคลินิกใกล้เคียง</p>
+                <p className="text-gray-600">ค้นหาโรงพยาบาล คลินิก และศูนย์สุขภาพใกล้เคียง</p>
               </div>
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -205,7 +286,7 @@ const Maps = () => {
                 </div>
                 <p className="text-gray-600 text-sm">{selectedLocation.name}</p>
                 <p className="text-medical-blue text-sm mt-1">
-                  พบโรงพยาบาล {nearbyHospitals.length} แห่ง ในรัศมี 30 กิโลเมตร
+                  พบสถานพยาบาล {nearbyFacilities.length} แห่ง ในรัศมี 30 กิโลเมตร
                 </p>
               </div>
             )}
@@ -217,7 +298,7 @@ const Maps = () => {
                   <span className="font-medium">แผนที่โต้ตอบได้</span>
                 </div>
                 <p className="text-sm text-gray-600 mt-1">
-                  ค้นหาสถานที่และคลิกที่เครื่องหมายบนแผนที่เพื่อดูข้อมูลเพิ่มเติม
+                  ค้นหาสถานที่และคลิกที่เครื่องหมายบนแผนที่เพื่อดูข้อมูลเพิ่มเติม หมุดสีแดง = โรงพยาบาล, หมุดสีเขียว = คลินิก/ศูนย์สุขภาพ
                 </p>
               </div>
               
@@ -239,25 +320,35 @@ const Maps = () => {
               </div>
             </div>
 
-            {nearbyHospitals.length > 0 && (
+            {nearbyFacilities.length > 0 && (
               <div className="bg-white rounded-lg shadow-sm border mt-6">
                 <div className="p-4 border-b">
                   <div className="flex items-center gap-2 text-medical-blue">
                     <Hospital className="h-5 w-5" />
-                    <span className="font-medium">โรงพยาบาลใกล้เคียง</span>
+                    <span className="font-medium">สถานพยาบาลใกล้เคียง</span>
                   </div>
                 </div>
-                <div className="max-h-60 overflow-y-auto">
-                  {nearbyHospitals.slice(0, 10).map((hospital, index) => (
-                    <div key={index} className="p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+                <div className="max-h-80 overflow-y-auto">
+                  {nearbyFacilities.map((facility, index) => (
+                    <div key={index} className="p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 cursor-pointer" onClick={() => handleFacilityClick(facility)}>
                       <div className="flex justify-between items-start">
-                        <div>
-                          <h4 className="font-medium text-medical-dark">{hospital.name}</h4>
-                          <p className="text-sm text-gray-600">ระยะทาง: {hospital.distance?.toFixed(1)} กิโลเมตร</p>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            {facility.type === 'hospital' ? (
+                              <Hospital className="h-4 w-4 text-red-500" />
+                            ) : (
+                              <Building className="h-4 w-4 text-green-500" />
+                            )}
+                            <h4 className="font-medium text-medical-dark">{facility.name}</h4>
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            {facility.type === 'hospital' ? 'โรงพยาบาล' : 'คลินิก/ศูนย์สุขภาพ'} • ระยะทาง: {facility.distance?.toFixed(1)} กิโลเมตร
+                          </p>
                         </div>
                         <button
-                          onClick={() => {
-                            mapInstance.current?.setView([hospital.lat, hospital.lng], 16);
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleFacilityClick(facility);
                           }}
                           className="text-medical-blue hover:text-medical-dark text-sm"
                         >
@@ -279,7 +370,7 @@ const Maps = () => {
                   <h3 className="font-semibold text-medical-dark">ค้นหาสถานที่</h3>
                 </div>
                 <p className="text-gray-600 text-sm">
-                  พิมพ์อย่างน้อย 3 ตัวอักษรเพื่อค้นหาสถานที่และแสดงโรงพยาบาลใกล้เคียง
+                  พิมพ์อย่างน้อย 3 ตัวอักษรเพื่อค้นหาสถานที่และแสดงสถานพยาบาลใกล้เคียง
                 </p>
               </div>
 
@@ -291,7 +382,7 @@ const Maps = () => {
                   <h3 className="font-semibold text-medical-dark">ตำแหน่งปัจจุบัน</h3>
                 </div>
                 <p className="text-gray-600 text-sm">
-                  คลิกปุ่มวงกลมในมุมซ้ายล่างของแผนที่เพื่อหาโรงพยาบาลใกล้เคียงโดยอัตโนมัติ
+                  คลิกปุ่มวงกลมในมุมซ้ายล่างของแผนที่เพื่อหาสถานพยาบาลใกล้เคียงโดยอัตโนมัติ
                 </p>
               </div>
 
@@ -300,10 +391,10 @@ const Maps = () => {
                   <div className="w-10 h-10 bg-medical-orange rounded-full flex items-center justify-center">
                     <Hospital className="h-5 w-5 text-white" />
                   </div>
-                  <h3 className="font-semibold text-medical-dark">โรงพยาบาลใกล้เคียง</h3>
+                  <h3 className="font-semibold text-medical-dark">สถานพยาบาลใกล้เคียง</h3>
                 </div>
                 <p className="text-gray-600 text-sm">
-                  แสดงโรงพยาบาลทั้งหมดในรัศมี 30 กิโลเมตรพร้อมระยะทาง
+                  แสดงโรงพยาบาล คลินิก และศูนย์สุขภาพทั้งหมดในรัศมี 30 กิโลเมตรเรียงตามระยะทาง
                 </p>
               </div>
             </div>
