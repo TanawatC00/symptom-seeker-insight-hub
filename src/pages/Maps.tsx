@@ -14,12 +14,14 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Create custom icon for hospitals
-const hospitalIcon = L.divIcon({
-  html: '<div style="background-color: #dc2626; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;"><span style="color: white; font-size: 12px;">🏥</span></div>',
-  className: 'custom-hospital-icon',
-  iconSize: [20, 20],
-  iconAnchor: [10, 10]
+// Create custom red icon for hospitals
+const hospitalIcon = L.icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
 });
 
 interface Hospital {
@@ -192,13 +194,6 @@ const Maps = () => {
               
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 <LocationSearch onLocationSelect={handleLocationSelect} />
-                <button
-                  onClick={centerToCurrentLocation}
-                  className="flex items-center gap-2 btn-primary whitespace-nowrap"
-                >
-                  <Navigation className="h-4 w-4" />
-                  ตำแหน่งปัจจุบัน
-                </button>
               </div>
             </div>
 
@@ -232,6 +227,15 @@ const Maps = () => {
                   className="w-full h-[600px]"
                   style={{ zIndex: 1 }}
                 />
+                
+                {/* Floating Current Location Button */}
+                <button
+                  onClick={centerToCurrentLocation}
+                  className="absolute bottom-4 left-4 w-12 h-12 bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:shadow-xl z-[1000]"
+                  title="ตำแหน่งปัจจุบัน"
+                >
+                  <Navigation className="h-5 w-5 text-medical-blue" />
+                </button>
               </div>
             </div>
 
@@ -287,7 +291,7 @@ const Maps = () => {
                   <h3 className="font-semibold text-medical-dark">ตำแหน่งปัจจุบัน</h3>
                 </div>
                 <p className="text-gray-600 text-sm">
-                  คลิกปุ่ม "ตำแหน่งปัจจุบัน" เพื่อหาโรงพยาบาลใกล้เคียงโดยอัตโนมัติ
+                  คลิกปุ่มวงกลมในมุมซ้ายล่างของแผนที่เพื่อหาโรงพยาบาลใกล้เคียงโดยอัตโนมัติ
                 </p>
               </div>
 
