@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ActivitySquare, Home, LogIn, LogOut, User, MessageCircle } from 'lucide-react';
+import { ActivitySquare, Home, LogIn, LogOut, User, MessageCircle, MapPin } from 'lucide-react';
 import { Button } from './ui/button';
 import { 
   NavigationMenu,
@@ -56,6 +56,12 @@ const Header = () => {
                   <Link to="/chatbot" className="flex items-center gap-1 text-gray-600 hover:text-medical-blue transition-colors">
                     <MessageCircle className="h-4 w-4" />
                     <span>แชทบอท</span>
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/maps" className="flex items-center gap-1 text-gray-600 hover:text-medical-blue transition-colors">
+                    <MapPin className="h-4 w-4" />
+                    <span>แผนที่</span>
                   </Link>
                 </li>
               </ul>
