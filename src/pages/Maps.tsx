@@ -53,8 +53,15 @@ const Maps = () => {
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
-    // Initialize the map
-    mapInstance.current = L.map(mapRef.current).setView([13.7563, 100.5018], 10); // Bangkok coordinates
+    // Initialize the map with custom zoom control position
+    mapInstance.current = L.map(mapRef.current, {
+      zoomControl: false // Disable default zoom control
+    }).setView([13.7563, 100.5018], 10); // Bangkok coordinates
+
+    // Add zoom control to top-right
+    L.control.zoom({
+      position: 'topright'
+    }).addTo(mapInstance.current);
 
     // Add tile layer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -272,10 +279,6 @@ const Maps = () => {
                 <h1 className="text-3xl font-bold text-medical-dark">แผนที่สถานพยาบาล</h1>
                 <p className="text-gray-600">ค้นหาโรงพยาบาล คลินิก และศูนย์สุขภาพใกล้เคียง</p>
               </div>
-              
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <LocationSearch onLocationSelect={handleLocationSelect} />
-              </div>
             </div>
 
             {selectedLocation && (
@@ -309,7 +312,12 @@ const Maps = () => {
                   style={{ zIndex: 1 }}
                 />
                 
-                {/* Floating Current Location Button */}
+                {/* Location Search in top-left corner */}
+                <div className="absolute top-4 left-4 z-[1000] w-80">
+                  <LocationSearch onLocationSelect={handleLocationSelect} />
+                </div>
+
+                {/* Current Location Button in bottom-left */}
                 <button
                   onClick={centerToCurrentLocation}
                   className="absolute bottom-4 left-4 w-12 h-12 bg-white hover:bg-gray-50 border-2 border-gray-300 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:shadow-xl z-[1000]"
