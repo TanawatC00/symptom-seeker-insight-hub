@@ -23,9 +23,13 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
   const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isSelecting, setIsSelecting] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout>();
 
   const searchLocation = async (query: string) => {
+    // Don't search if we're in the middle of selecting a location
+    if (isSelecting) return;
+    
     // Require at least 2 characters for search (reduced from 3)
     if (query.length < 2) {
       setSuggestions([]);
@@ -123,10 +127,16 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
         clearTimeout(debounceTimeoutRef.current);
       }
     };
-  }, [searchQuery]);
+  }, [searchQuery, isSelecting]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    
+    // Reset selecting state when user starts typing again
+    if (isSelecting) {
+      setIsSelecting(false);
+    }
+    
     setSearchQuery(value);
     
     // Show loading state immediately if we have 2+ characters
@@ -138,15 +148,23 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
   const handleLocationSelect = (suggestion: SearchResult) => {
     const lat = parseFloat(suggestion.lat);
     const lng = parseFloat(suggestion.lon);
-    setSearchQuery(suggestion.display_name);
+    
+    // Set selection state to prevent further searches
+    setIsSelecting(true);
+    
+    // Clear the search query and hide suggestions immediately
+    setSearchQuery('');
+    setSuggestions([]);
     setShowSuggestions(false);
+    setIsLoading(false);
+    
     onLocationSelect(lat, lng, suggestion.display_name);
     
     console.log(`Selected location: ${suggestion.display_name} (${lat}, ${lng})`);
   };
 
   const handleInputFocus = () => {
-    if (suggestions.length > 0 && searchQuery.length >= 2) {
+    if (suggestions.length > 0 && searchQuery.length >= 2 && !isSelecting) {
       setShowSuggestions(true);
     }
   };
@@ -189,7 +207,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
       </div>
 
       {/* Show minimum character requirement hint */}
-      {searchQuery.length > 0 && searchQuery.length < 2 && (
+      {searchQuery.length > 0 && searchQuery.length < 2 && !isSelecting && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-center">
           <span className="text-sm text-gray-500">
             พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหาสถานที่
@@ -198,7 +216,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
       )}
 
       {/* Loading state */}
-      {isLoading && searchQuery.length >= 2 && (
+      {isLoading && searchQuery.length >= 2 && !isSelecting && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center">
           <div className="flex items-center justify-center gap-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-medical-blue"></div>
@@ -208,7 +226,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
       )}
 
       {/* Suggestions dropdown */}
-      {showSuggestions && suggestions.length > 0 && !isLoading && (
+      {showSuggestions && suggestions.length > 0 && !isLoading && !isSelecting && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-auto">
           <div className="p-2 border-b border-gray-100">
             <span className="text-xs text-gray-500">
@@ -228,15 +246,6 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
                 <span className="text-sm text-gray-900 line-clamp-2 leading-relaxed">
                   {suggestion.display_name}
                 </span>
-                {suggestion.type && (
-                  <span className="text-xs text-gray-500 mt-1 block">
-                    {suggestion.type === 'city' ? 'เมือง' : 
-                     suggestion.type === 'town' ? 'ตำบล' :
-                     suggestion.type === 'village' ? 'หมู่บ้าน' :
-                     suggestion.type === 'county' ? 'อำเภอ' :
-                     suggestion.type === 'state' ? 'จังหวัด' : suggestion.type}
-                  </span>
-                )}
               </div>
             </button>
           ))}
@@ -244,7 +253,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
       )}
 
       {/* No results message */}
-      {showSuggestions && suggestions.length === 0 && !isLoading && searchQuery.length >= 2 && (
+      {showSuggestions && suggestions.length === 0 && !isLoading && searchQuery.length >= 2 && !isSelecting && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center">
           <div className="flex items-center justify-center gap-2 text-gray-500">
             <MapPin className="h-4 w-4" />
