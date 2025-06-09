@@ -268,7 +268,7 @@ const Maps = () => {
   };
 
   const openInGoogleMaps = (facility: HealthFacility) => {
-    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${facility.lat},${facility.lng}&query_place_id=${encodeURIComponent(facility.name)}`;
+    const googleMapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(facility.name)}`;
     window.open(googleMapsUrl, '_blank');
   };
 
