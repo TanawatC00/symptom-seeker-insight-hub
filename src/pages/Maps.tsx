@@ -267,6 +267,11 @@ const Maps = () => {
     }
   };
 
+  const openInGoogleMaps = (facility: HealthFacility) => {
+    const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${facility.lat},${facility.lng}&query_place_id=${encodeURIComponent(facility.name)}`;
+    window.open(googleMapsUrl, '_blank');
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -356,7 +361,7 @@ const Maps = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleFacilityClick(facility);
+                            openInGoogleMaps(facility);
                           }}
                           className="text-medical-blue hover:text-medical-dark text-sm"
                         >
