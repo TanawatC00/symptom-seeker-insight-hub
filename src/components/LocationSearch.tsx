@@ -14,6 +14,8 @@ interface SearchResult {
   display_name: string;
   lat: string;
   lon: string;
+  type: string;
+  importance: number;
 }
 
 const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => {
@@ -24,8 +26,8 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
   const debounceTimeoutRef = useRef<NodeJS.Timeout>();
 
   const searchLocation = async (query: string) => {
-    // Require at least 3 characters for search
-    if (query.length < 3) {
+    // Require at least 2 characters for search (reduced from 3)
+    if (query.length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
@@ -33,16 +35,65 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
 
     setIsLoading(true);
     try {
-      // Enhanced search with Thai language support
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=8&countrycodes=th&addressdetails=1&accept-language=th,en&namedetails=1&extratags=1`
+      // Enhanced search with multiple queries for comprehensive results
+      const searchQueries = [
+        // Primary search with the exact query
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=12&countrycodes=th&addressdetails=1&accept-language=th,en&namedetails=1&extratags=1&dedupe=1`,
+        
+        // Search with administrative areas (provinces, districts, cities)
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=8&countrycodes=th&addressdetails=1&accept-language=th,en&namedetails=1&extratags=1&featuretype=city,state,county&dedupe=1`,
+        
+        // Search with tourism and landmark places
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=8&countrycodes=th&addressdetails=1&accept-language=th,en&namedetails=1&extratags=1&featuretype=settlement&dedupe=1`
+      ];
+
+      // Execute all search queries concurrently
+      const responses = await Promise.all(
+        searchQueries.map(url => fetch(url).then(res => res.json()))
       );
-      const data = await response.json();
-      
-      // Filter and sort results to prioritize Thai locations
-      const filteredResults = data.filter((result: SearchResult) => {
-        return result.display_name && result.lat && result.lon;
+
+      // Combine and deduplicate results
+      const allResults: SearchResult[] = [];
+      const seenPlaceIds = new Set<string>();
+
+      responses.forEach(data => {
+        data.forEach((result: SearchResult) => {
+          if (!seenPlaceIds.has(result.place_id) && result.display_name && result.lat && result.lon) {
+            seenPlaceIds.add(result.place_id);
+            allResults.push(result);
+          }
+        });
       });
+
+      // Enhanced filtering and sorting
+      const filteredResults = allResults
+        .filter((result: SearchResult) => {
+          // Filter out very low importance results unless they match closely
+          const queryLower = query.toLowerCase();
+          const nameLower = result.display_name.toLowerCase();
+          
+          // Always include if name starts with the query
+          if (nameLower.includes(queryLower)) {
+            return true;
+          }
+          
+          // Include high importance results
+          return result.importance > 0.1;
+        })
+        .sort((a, b) => {
+          const queryLower = query.toLowerCase();
+          
+          // Prioritize exact matches at the beginning
+          const aStartsWith = a.display_name.toLowerCase().startsWith(queryLower);
+          const bStartsWith = b.display_name.toLowerCase().startsWith(queryLower);
+          
+          if (aStartsWith && !bStartsWith) return -1;
+          if (!aStartsWith && bStartsWith) return 1;
+          
+          // Then prioritize by importance
+          return (b.importance || 0) - (a.importance || 0);
+        })
+        .slice(0, 15); // Limit to top 15 results
 
       setSuggestions(filteredResults);
       setShowSuggestions(filteredResults.length > 0);
@@ -62,10 +113,10 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
       clearTimeout(debounceTimeoutRef.current);
     }
 
-    // Debounce search with 500ms delay for better performance
+    // Reduced debounce delay for faster response
     debounceTimeoutRef.current = setTimeout(() => {
       searchLocation(searchQuery);
-    }, 500);
+    }, 300);
 
     return () => {
       if (debounceTimeoutRef.current) {
@@ -78,8 +129,8 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
     const value = e.target.value;
     setSearchQuery(value);
     
-    // Show loading state immediately if we have 3+ characters
-    if (value.length >= 3) {
+    // Show loading state immediately if we have 2+ characters
+    if (value.length >= 2) {
       setIsLoading(true);
     }
   };
@@ -95,7 +146,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
   };
 
   const handleInputFocus = () => {
-    if (suggestions.length > 0 && searchQuery.length >= 3) {
+    if (suggestions.length > 0 && searchQuery.length >= 2) {
       setShowSuggestions(true);
     }
   };
@@ -105,6 +156,21 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
     setTimeout(() => {
       setShowSuggestions(false);
     }, 200);
+  };
+
+  const getLocationTypeIcon = (suggestion: SearchResult) => {
+    const type = suggestion.type?.toLowerCase() || '';
+    const displayName = suggestion.display_name?.toLowerCase() || '';
+    
+    // Determine icon based on location type
+    if (type.includes('city') || type.includes('town') || type.includes('village') || 
+        displayName.includes('จังหวัด') || displayName.includes('เมือง') || displayName.includes('อำเภอ')) {
+      return '🏙️';
+    } else if (type.includes('tourism') || displayName.includes('วัด') || displayName.includes('อุทยาน')) {
+      return '🏛️';
+    } else {
+      return '📍';
+    }
   };
 
   return (
@@ -123,16 +189,16 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
       </div>
 
       {/* Show minimum character requirement hint */}
-      {searchQuery.length > 0 && searchQuery.length < 3 && (
+      {searchQuery.length > 0 && searchQuery.length < 2 && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-center">
           <span className="text-sm text-gray-500">
-            พิมพ์อย่างน้อย 3 ตัวอักษรเพื่อค้นหาสถานที่
+            พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหาสถานที่
           </span>
         </div>
       )}
 
       {/* Loading state */}
-      {isLoading && searchQuery.length >= 3 && (
+      {isLoading && searchQuery.length >= 2 && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center">
           <div className="flex items-center justify-center gap-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-medical-blue"></div>
@@ -143,7 +209,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
 
       {/* Suggestions dropdown */}
       {showSuggestions && suggestions.length > 0 && !isLoading && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-72 overflow-auto">
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-auto">
           <div className="p-2 border-b border-gray-100">
             <span className="text-xs text-gray-500">
               พบ {suggestions.length} สถานที่ที่เกี่ยวข้อง
@@ -155,11 +221,22 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
               className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-start gap-3 border-b border-gray-100 last:border-b-0 transition-colors"
               onClick={() => handleLocationSelect(suggestion)}
             >
-              <MapPin className="h-4 w-4 text-medical-blue flex-shrink-0 mt-0.5" />
+              <span className="text-lg flex-shrink-0 mt-0.5">
+                {getLocationTypeIcon(suggestion)}
+              </span>
               <div className="flex-1 min-w-0">
                 <span className="text-sm text-gray-900 line-clamp-2 leading-relaxed">
                   {suggestion.display_name}
                 </span>
+                {suggestion.type && (
+                  <span className="text-xs text-gray-500 mt-1 block">
+                    {suggestion.type === 'city' ? 'เมือง' : 
+                     suggestion.type === 'town' ? 'ตำบล' :
+                     suggestion.type === 'village' ? 'หมู่บ้าน' :
+                     suggestion.type === 'county' ? 'อำเภอ' :
+                     suggestion.type === 'state' ? 'จังหวัด' : suggestion.type}
+                  </span>
+                )}
               </div>
             </button>
           ))}
@@ -167,7 +244,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
       )}
 
       {/* No results message */}
-      {showSuggestions && suggestions.length === 0 && !isLoading && searchQuery.length >= 3 && (
+      {showSuggestions && suggestions.length === 0 && !isLoading && searchQuery.length >= 2 && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center">
           <div className="flex items-center justify-center gap-2 text-gray-500">
             <MapPin className="h-4 w-4" />
