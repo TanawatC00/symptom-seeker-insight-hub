@@ -415,7 +415,9 @@ const Maps = () => {
                 <div className="p-4 border-b">
                   <div className="flex items-center gap-2 text-medical-blue">
                     <Hospital className="h-5 w-5" />
-                    <span className="font-medium">สถานพยาบาลใกล้เคียง</span>
+                    <span className="font-medium">
+                      สถานพยาบาลใกล้เคียง{selectedLocation && ` - ${selectedLocation.name}`}
+                    </span>
                   </div>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
