@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -363,19 +362,6 @@ const Maps = () => {
               </div>
             </div>
 
-            {selectedLocation && (
-              <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <MapPin className="h-5 w-5 text-medical-blue" />
-                  <span className="font-medium text-medical-dark">ตำแหน่งที่เลือก</span>
-                </div>
-                <p className="text-gray-600 text-sm">{selectedLocation.name}</p>
-                <p className="text-medical-blue text-sm mt-1">
-                  พบสถานพยาบาล {nearbyFacilities.length} แห่ง ในรัศมี 30 กิโลเมตร
-                </p>
-              </div>
-            )}
-
             <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
               <div className="p-4 border-b">
                 <div className="flex items-center gap-2 text-medical-blue">
@@ -500,3 +486,5 @@ const Maps = () => {
 };
 
 export default Maps;
+
+</edits_to_apply>
