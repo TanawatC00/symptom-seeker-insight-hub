@@ -47,6 +47,8 @@ const Maps = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const bangkokMarkerRef = useRef<L.Marker | null>(null);
+  const currentLocationMarkerRef = useRef<L.Marker | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, name: string} | null>(null);
   const [nearbyFacilities, setNearbyFacilities] = useState<HealthFacility[]>([]);
 
@@ -85,8 +87,8 @@ const Maps = () => {
       attribution: '© OpenStreetMap contributors'
     }).addTo(mapInstance.current);
 
-    // Add a marker for Bangkok
-    const bangkokMarker = L.marker([bangkokLat, bangkokLng])
+    // Add a marker for Bangkok and store the reference
+    bangkokMarkerRef.current = L.marker([bangkokLat, bangkokLng])
       .addTo(mapInstance.current)
       .bindPopup('กรุงเทพมหานคร<br>Bangkok, Thailand')
       .openPopup();
@@ -154,7 +156,19 @@ const Maps = () => {
           const { latitude, longitude } = position.coords;
           mapInstance.current!.setView([latitude, longitude], 15);
           
-          L.marker([latitude, longitude])
+          // Remove Bangkok marker when using current location
+          if (bangkokMarkerRef.current) {
+            mapInstance.current!.removeLayer(bangkokMarkerRef.current);
+            bangkokMarkerRef.current = null;
+          }
+
+          // Remove existing current location marker if any
+          if (currentLocationMarkerRef.current) {
+            mapInstance.current!.removeLayer(currentLocationMarkerRef.current);
+          }
+
+          // Add current location marker
+          currentLocationMarkerRef.current = L.marker([latitude, longitude])
             .addTo(mapInstance.current!)
             .bindPopup('ตำแหน่งปัจจุบันของคุณ')
             .openPopup();
@@ -267,6 +281,18 @@ const Maps = () => {
 
   const handleLocationSelect = (lat: number, lng: number, placeName: string) => {
     if (!mapInstance.current) return;
+
+    // Remove Bangkok marker when a new location is selected
+    if (bangkokMarkerRef.current) {
+      mapInstance.current.removeLayer(bangkokMarkerRef.current);
+      bangkokMarkerRef.current = null;
+    }
+
+    // Remove existing current location marker if any
+    if (currentLocationMarkerRef.current) {
+      mapInstance.current.removeLayer(currentLocationMarkerRef.current);
+      currentLocationMarkerRef.current = null;
+    }
 
     // Set the selected location
     setSelectedLocation({ lat, lng, name: placeName });
