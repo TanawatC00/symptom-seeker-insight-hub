@@ -65,6 +65,15 @@ const Maps = () => {
     return distance;
   };
 
+  const clearAllMarkers = () => {
+    markersRef.current.forEach(marker => {
+      if (mapInstance.current) {
+        mapInstance.current.removeLayer(marker);
+      }
+    });
+    markersRef.current = [];
+  };
+
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
@@ -113,16 +122,15 @@ const Maps = () => {
     setNearbyFacilities(facilitiesWithDistance);
     setSelectedLocation({ lat: bangkokLat, lng: bangkokLng, name: 'กรุงเทพมหานคร' });
 
-    hospitals.forEach((hospital, index) => {
-      const facility = facilitiesWithDistance[index];
-      const marker = L.marker([hospital.lat, hospital.lng], { icon: hospitalIcon })
+    facilitiesWithDistance.forEach((facility) => {
+      const marker = L.marker([facility.lat, facility.lng], { icon: hospitalIcon })
         .addTo(mapInstance.current!)
         .bindPopup(`
           <div style="min-width: 200px;">
-            <strong>${hospital.name}</strong><br>
+            <strong>${facility.name}</strong><br>
             <small style="color: #666;">โรงพยาบาล</small><br>
             <span style="color: #0066cc;">ระยะทาง: ${facility.distance.toFixed(1)} กม.</span><br>
-            <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lng}', '_blank')" 
+            <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${facility.lat},${facility.lng}', '_blank')" 
                     style="margin-top: 8px; padding: 4px 8px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
               นำทาง
             </button>
@@ -131,8 +139,8 @@ const Maps = () => {
       
       // Add click event to center map on marker and handle facility click
       marker.on('click', () => {
-        mapInstance.current?.setView([hospital.lat, hospital.lng], 16);
-        console.log(`Clicked on ${hospital.name}`);
+        mapInstance.current?.setView([facility.lat, facility.lng], 16);
+        console.log(`Clicked on ${facility.name}`);
       });
       
       markersRef.current.push(marker);
@@ -141,6 +149,7 @@ const Maps = () => {
     // Cleanup function
     return () => {
       if (mapInstance.current) {
+        clearAllMarkers();
         mapInstance.current.remove();
         mapInstance.current = null;
       }
@@ -192,12 +201,22 @@ const Maps = () => {
       const hospitalResponse = await fetch(
         `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["amenity"="hospital"](around:30000,${lat},${lng});way["amenity"="hospital"](around:30000,${lat},${lng});relation["amenity"="hospital"](around:30000,${lat},${lng}););out center;`
       );
+      
+      if (!hospitalResponse.ok) {
+        throw new Error('Failed to fetch hospital data');
+      }
+      
       const hospitalData = await hospitalResponse.json();
 
       // Search for clinics and health centers
       const clinicResponse = await fetch(
         `https://overpass-api.de/api/interpreter?data=[out:json][timeout:25];(node["amenity"="clinic"](around:30000,${lat},${lng});way["amenity"="clinic"](around:30000,${lat},${lng});relation["amenity"="clinic"](around:30000,${lat},${lng});node["healthcare"="centre"](around:30000,${lat},${lng});way["healthcare"="centre"](around:30000,${lat},${lng}););out center;`
       );
+      
+      if (!clinicResponse.ok) {
+        throw new Error('Failed to fetch clinic data');
+      }
+      
       const clinicData = await clinicResponse.json();
       
       const facilities: HealthFacility[] = [];
@@ -242,10 +261,7 @@ const Maps = () => {
       setNearbyFacilities(facilities);
       
       // Clear existing markers
-      markersRef.current.forEach(marker => {
-        mapInstance.current?.removeLayer(marker);
-      });
-      markersRef.current = [];
+      clearAllMarkers();
 
       // Add new markers
       facilities.forEach(facility => {
@@ -276,6 +292,7 @@ const Maps = () => {
 
     } catch (error) {
       console.error('Error searching health facilities:', error);
+      alert('เกิดข้อผิดพลาดในการค้นหาสถานพยาบาล กรุณาลองใหม่อีกครั้ง');
     }
   };
 
