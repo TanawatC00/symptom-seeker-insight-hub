@@ -50,13 +50,30 @@ const Maps = () => {
   const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, name: string} | null>(null);
   const [nearbyFacilities, setNearbyFacilities] = useState<HealthFacility[]>([]);
 
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371; // Radius of Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const distance = R * c;
+    return distance;
+  };
+
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
+
+    // Bangkok coordinates
+    const bangkokLat = 13.7563;
+    const bangkokLng = 100.5018;
 
     // Initialize the map with custom zoom control position
     mapInstance.current = L.map(mapRef.current, {
       zoomControl: false // Disable default zoom control
-    }).setView([13.7563, 100.5018], 10); // Bangkok coordinates
+    }).setView([bangkokLat, bangkokLng], 10);
 
     // Add zoom control to top-right
     L.control.zoom({
@@ -69,12 +86,12 @@ const Maps = () => {
     }).addTo(mapInstance.current);
 
     // Add a marker for Bangkok
-    const bangkokMarker = L.marker([13.7563, 100.5018])
+    const bangkokMarker = L.marker([bangkokLat, bangkokLng])
       .addTo(mapInstance.current)
       .bindPopup('กรุงเทพมหานคร<br>Bangkok, Thailand')
       .openPopup();
 
-    // Add some sample markers for hospitals
+    // Add some sample hospitals near Bangkok with distance calculation
     const hospitals = [
       { name: 'โรงพยาบาลจุฬาลงกรณ์', lat: 13.7326, lng: 100.5262 },
       { name: 'โรงพยาบาลศิริราช', lat: 13.7581, lng: 100.4797 },
@@ -82,10 +99,40 @@ const Maps = () => {
       { name: 'โรงพยาบาลเวชศาสตร์เขตร้อน', lat: 13.7297, lng: 100.5215 }
     ];
 
-    hospitals.forEach(hospital => {
+    // Create facilities array with distance calculation
+    const facilitiesWithDistance = hospitals.map(hospital => ({
+      ...hospital,
+      distance: calculateDistance(bangkokLat, bangkokLng, hospital.lat, hospital.lng),
+      type: 'hospital' as const
+    }));
+
+    // Sort by distance and set initial nearby facilities
+    facilitiesWithDistance.sort((a, b) => a.distance - b.distance);
+    setNearbyFacilities(facilitiesWithDistance);
+    setSelectedLocation({ lat: bangkokLat, lng: bangkokLng, name: 'กรุงเทพมหานคร' });
+
+    hospitals.forEach((hospital, index) => {
+      const facility = facilitiesWithDistance[index];
       const marker = L.marker([hospital.lat, hospital.lng], { icon: hospitalIcon })
         .addTo(mapInstance.current!)
-        .bindPopup(`<strong>${hospital.name}</strong><br>โรงพยาบาลในกรุงเทพฯ`);
+        .bindPopup(`
+          <div style="min-width: 200px;">
+            <strong>${hospital.name}</strong><br>
+            <small style="color: #666;">โรงพยาบาล</small><br>
+            <span style="color: #0066cc;">ระยะทาง: ${facility.distance.toFixed(1)} กม.</span><br>
+            <button onclick="window.open('https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lng}', '_blank')" 
+                    style="margin-top: 8px; padding: 4px 8px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer;">
+              นำทาง
+            </button>
+          </div>
+        `);
+      
+      // Add click event to center map on marker and handle facility click
+      marker.on('click', () => {
+        mapInstance.current?.setView([hospital.lat, hospital.lng], 16);
+        console.log(`Clicked on ${hospital.name}`);
+      });
+      
       markersRef.current.push(marker);
     });
 
@@ -123,19 +170,6 @@ const Maps = () => {
     } else {
       alert('เบราว์เซอร์ของคุณไม่รองรับการหาตำแหน่ง');
     }
-  };
-
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Radius of Earth in kilometers
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const distance = R * c;
-    return distance;
   };
 
   const searchNearbyHealthFacilities = async (lat: number, lng: number) => {
