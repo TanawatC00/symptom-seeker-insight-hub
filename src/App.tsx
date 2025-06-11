@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./hooks/useGoogleAuth";
+import { LanguageProvider } from "./contexts/LanguageContext";
 import Index from "./pages/Index";
 import SymptomChecker from "./pages/SymptomChecker";
 import Results from "./pages/Results";
@@ -25,20 +26,22 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner position="top-right" />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/checker" element={<SymptomChecker />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/chatbot" element={<Chatbot />} />
-            <Route path="/maps" element={<Maps />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <Toaster />
+          <Sonner position="top-right" />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/checker" element={<SymptomChecker />} />
+              <Route path="/results" element={<Results />} />
+              <Route path="/chatbot" element={<Chatbot />} />
+              <Route path="/maps" element={<Maps />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </LanguageProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

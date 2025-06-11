@@ -4,25 +4,20 @@ import { Link } from 'react-router-dom';
 import { ActivitySquare, Home, LogIn, LogOut, User, MessageCircle, MapPin } from 'lucide-react';
 import { Button } from './ui/button';
 import { 
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from '@/lib/utils';
 import { useGoogleAuth } from '../hooks/useGoogleAuth';
+import { useLanguage } from '../contexts/LanguageContext';
+import LanguageToggle from './LanguageToggle';
 import AuthModal from './AuthModal';
 
 const Header = () => {
   const { user, signOut } = useGoogleAuth();
+  const { t } = useLanguage();
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const openAuthModal = () => setIsAuthModalOpen(true);
@@ -49,23 +44,25 @@ const Header = () => {
                 <li>
                   <Link to="/" className="flex items-center gap-1 text-gray-600 hover:text-medical-blue transition-colors">
                     <Home className="h-4 w-4" />
-                    <span>หน้าหลัก</span>
+                    <span>{t('header.home')}</span>
                   </Link>
                 </li>
                 <li>
                   <Link to="/chatbot" className="flex items-center gap-1 text-gray-600 hover:text-medical-blue transition-colors">
                     <MessageCircle className="h-4 w-4" />
-                    <span>แชทบอท</span>
+                    <span>{t('header.chatbot')}</span>
                   </Link>
                 </li>
                 <li>
                   <Link to="/maps" className="flex items-center gap-1 text-gray-600 hover:text-medical-blue transition-colors">
                     <MapPin className="h-4 w-4" />
-                    <span>แผนที่</span>
+                    <span>{t('header.maps')}</span>
                   </Link>
                 </li>
               </ul>
             </nav>
+
+            <LanguageToggle />
 
             {user ? (
               <DropdownMenu>
@@ -87,7 +84,7 @@ const Header = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={signOut} className="text-red-500 focus:text-red-500">
                     <LogOut className="h-4 w-4 mr-2" />
-                    ออกจากระบบ
+                    {t('header.logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -98,7 +95,7 @@ const Header = () => {
                 className="flex items-center gap-2"
               >
                 <LogIn className="h-4 w-4" />
-                <span>เข้าสู่ระบบ</span>
+                <span>{t('header.login')}</span>
               </Button>
             )}
           </div>
