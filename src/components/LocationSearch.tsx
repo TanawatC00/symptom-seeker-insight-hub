@@ -4,6 +4,7 @@ import { Search, MapPin } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from './ui/command';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface LocationSearchProps {
   onLocationSelect: (lat: number, lng: number, placeName: string) => void;
@@ -25,6 +26,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
   const debounceTimeoutRef = useRef<NodeJS.Timeout>();
+  const { t, language } = useLanguage();
 
   const searchLocation = async (query: string) => {
     // Don't search if we're in the middle of selecting a location
@@ -197,7 +199,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
         <Input
           type="text"
-          placeholder="ค้นหาสถานที่ในประเทศไทย..."
+          placeholder={t('search.placeholder')}
           value={searchQuery}
           onChange={handleInputChange}
           onFocus={handleInputFocus}
@@ -210,7 +212,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
       {searchQuery.length > 0 && searchQuery.length < 2 && !isSelecting && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-3 text-center">
           <span className="text-sm text-gray-500">
-            พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหาสถานที่
+            {t('search.minCharacters')}
           </span>
         </div>
       )}
@@ -220,7 +222,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center">
           <div className="flex items-center justify-center gap-2">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-medical-blue"></div>
-            <span className="text-sm text-gray-500">กำลังค้นหาสถานที่...</span>
+            <span className="text-sm text-gray-500">{t('search.searching')}</span>
           </div>
         </div>
       )}
@@ -230,7 +232,7 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-80 overflow-auto">
           <div className="p-2 border-b border-gray-100">
             <span className="text-xs text-gray-500">
-              พบ {suggestions.length} สถานที่ที่เกี่ยวข้อง
+              {t('search.resultsFound').replace('{count}', suggestions.length.toString())}
             </span>
           </div>
           {suggestions.map((suggestion) => (
@@ -257,10 +259,10 @@ const LocationSearch: React.FC<LocationSearchProps> = ({ onLocationSelect }) => 
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-center">
           <div className="flex items-center justify-center gap-2 text-gray-500">
             <MapPin className="h-4 w-4" />
-            <span className="text-sm">ไม่พบสถานที่ที่ตรงกับ "{searchQuery}"</span>
+            <span className="text-sm">{t('search.noResults').replace('{query}', searchQuery)}</span>
           </div>
           <p className="text-xs text-gray-400 mt-1">
-            ลองค้นหาด้วยคำอื่นหรือตรวจสอบการสะกดอีกครั้ง
+            {t('search.tryAgain')}
           </p>
         </div>
       )}

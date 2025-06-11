@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 export type Language = 'th' | 'en';
@@ -50,7 +49,7 @@ const translations = {
     
     // Maps page
     'maps.title': 'ค้นหาสถานพยาบาล',
-    'maps.subtitle': 'ค้นหาโรงพyาบาล คลินิก และศูนย์สุขภาพใกล้เคียง',
+    'maps.subtitle': 'ค้นหาสถานพยาบาล คลินิก และศูนย์สุขภาพใกล้เคียง',
     'maps.nearbyFacilities': 'สถานพยาบาลใกล้เคียง',
     'maps.interactiveMap': 'แผนที่แบบโต้ตอบ',
     'maps.myLocation': 'ตำแหน่งของฉัน',
@@ -58,6 +57,21 @@ const translations = {
     'maps.type': 'ประเภท',
     'maps.distance': 'ระยะทาง',
     'maps.selectLocation': 'เลือกตำแหน่งเพื่อค้นหาสถานพยาบาลใกล้เคียง',
+
+    // Location Search
+    'search.placeholder': 'ค้นหาสถานที่ในประเทศไทย...',
+    'search.minCharacters': 'พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหาสถานที่',
+    'search.searching': 'กำลังค้นหาสถานที่...',
+    'search.resultsFound': 'พบ {count} สถานที่ที่เกี่ยวข้อง',
+    'search.noResults': 'ไม่พบสถานที่ที่ตรงกับ "{query}"',
+    'search.tryAgain': 'ลองค้นหาด้วยคำอื่นหรือตรวจสอบการสะกดอีกครั้ง',
+    'search.userLocation': 'ตำแหน่งของคุณ',
+    'search.here': 'คุณอยู่ที่นี่',
+
+    // Facility data
+    'facility.hospital': 'โรงพยาบาล',
+    'facility.clinic': 'คลินิก', 
+    'facility.healthCenter': 'ศูนย์สุขภาพ',
 
     // Footer
     'footer.copyright': 'สงวนลิขสิทธิ์',
@@ -102,6 +116,21 @@ const translations = {
     'maps.distance': 'Distance',
     'maps.selectLocation': 'Select a location to find nearby healthcare facilities',
 
+    // Location Search
+    'search.placeholder': 'Search for places in Thailand...',
+    'search.minCharacters': 'Type at least 2 characters to search for places',
+    'search.searching': 'Searching for places...',
+    'search.resultsFound': 'Found {count} related places',
+    'search.noResults': 'No places found matching "{query}"',
+    'search.tryAgain': 'Try searching with different keywords or check your spelling',
+    'search.userLocation': 'Your Location',
+    'search.here': 'You are here',
+
+    // Facility data
+    'facility.hospital': 'Hospital',
+    'facility.clinic': 'Clinic',
+    'facility.healthCenter': 'Health Center',
+
     // Footer
     'footer.copyright': 'All rights reserved',
     'footer.medicalDisclaimer': 'Medical Disclaimer:',
@@ -137,4 +166,12 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
       {children}
     </LanguageContext.Provider>
   );
+};
+
+export const useLanguage = () => {
+  const context = useContext(LanguageContext);
+  if (!context) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
 };

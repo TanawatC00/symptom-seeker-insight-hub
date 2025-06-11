@@ -25,40 +25,41 @@ interface Location {
   longitude: number;
 }
 
-const facilityData: Facility[] = [
-  {
-    id: 'hospital-001',
-    name: 'โรงพยาบาล A',
-    address: '123 ถนน Main, เมือง',
-    latitude: 13.7563,
-    longitude: 100.5018,
-    type: 'โรงพยาบาล'
-  },
-  {
-    id: 'clinic-001',
-    name: 'คลินิก B',
-    address: '456 ถนน รอง, เมือง',
-    latitude: 13.7527,
-    longitude: 100.4939,
-    type: 'คลินิก'
-  },
-  {
-    id: 'healthcenter-001',
-    name: 'ศูนย์สุขภาพ C',
-    address: '789 ถนน สาม, เมือง',
-    latitude: 13.7469,
-    longitude: 100.5062,
-    type: 'ศูนย์สุขภาพ'
-  },
-];
-
 const Maps = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const [userLocation, setUserLocation] = useState<Location | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [nearbyFacilities, setNearbyFacilities] = useState<Facility[]>([]);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Facility data with translations
+  const facilityData: Facility[] = [
+    {
+      id: 'hospital-001',
+      name: language === 'th' ? 'โรงพยาบาล A' : 'Hospital A',
+      address: language === 'th' ? '123 ถนน Main, เมือง' : '123 Main Street, City',
+      latitude: 13.7563,
+      longitude: 100.5018,
+      type: t('facility.hospital')
+    },
+    {
+      id: 'clinic-001',
+      name: language === 'th' ? 'คลินิก B' : 'Clinic B',
+      address: language === 'th' ? '456 ถนน รอง, เมือง' : '456 Secondary Street, City',
+      latitude: 13.7527,
+      longitude: 100.4939,
+      type: t('facility.clinic')
+    },
+    {
+      id: 'healthcenter-001',
+      name: language === 'th' ? 'ศูนย์สุขภาพ C' : 'Health Center C',
+      address: language === 'th' ? '789 ถนน สาม, เมือง' : '789 Third Street, City',
+      latitude: 13.7469,
+      longitude: 100.5062,
+      type: t('facility.healthCenter')
+    },
+  ];
 
   useEffect(() => {
     // Initialize Leaflet map
@@ -77,11 +78,11 @@ const Maps = () => {
       navigator.geolocation.getCurrentPosition(
         position => {
           const { latitude, longitude } = position.coords;
-          setUserLocation({ name: 'ตำแหน่งของคุณ', latitude, longitude });
+          setUserLocation({ name: t('search.userLocation'), latitude, longitude });
           map.current?.setView([latitude, longitude], 15);
 
           L.marker([latitude, longitude]).addTo(map.current!)
-            .bindPopup('คุณอยู่ที่นี่').openPopup();
+            .bindPopup(t('search.here')).openPopup();
         },
         () => {
           console.log('User denied geolocation.');
@@ -92,7 +93,7 @@ const Maps = () => {
     return () => {
       map.current?.remove();
     };
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (map.current) {
@@ -139,7 +140,7 @@ const Maps = () => {
 
       setNearbyFacilities(nearby);
     }
-  }, [selectedLocation]);
+  }, [selectedLocation, language, t]);
 
   const handleLocationSelect = (lat: number, lng: number, placeName: string) => {
     const location: Location = {
@@ -170,98 +171,98 @@ const Maps = () => {
                 </div>
                 <p className="text-gray-600">{t('maps.subtitle')}</p>
               </div>
-            </div>
 
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-semibold text-medical-dark">
-                  {t('maps.nearbyFacilities')}{selectedLocation && ` - ${selectedLocation.name}`}
-                </h2>
-                <LocationSearch onLocationSelect={handleLocationSelect} />
-              </div>
-              
-              <div className="max-h-96 overflow-y-auto">
-                {nearbyFacilities.length > 0 ? (
-                  <div className="divide-y">
-                    {nearbyFacilities.map((facility, index) => (
-                      <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
-                        <div className="flex justify-between items-start gap-4">
-                          <div className="flex-1">
-                            <h3 className="font-medium text-medical-dark mb-1">{facility.name}</h3>
-                            <p className="text-sm text-gray-600 mb-2">{facility.address}</p>
-                            <div className="flex items-center gap-4 text-xs text-gray-500">
-                              <span>{t('maps.type')}: {facility.type}</span>
-                              <span>{t('maps.distance')}: {facility.distance}</span>
+              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <div className="p-4 border-b">
+                  <h2 className="text-lg font-semibold text-medical-dark mb-4">
+                    {t('maps.nearbyFacilities')}{selectedLocation && ` - ${selectedLocation.name}`}
+                  </h2>
+                  <LocationSearch onLocationSelect={handleLocationSelect} />
+                </div>
+                
+                <div className="max-h-96 overflow-y-auto">
+                  {nearbyFacilities.length > 0 ? (
+                    <div className="divide-y">
+                      {nearbyFacilities.map((facility, index) => (
+                        <div key={index} className="p-4 hover:bg-gray-50 transition-colors">
+                          <div className="flex justify-between items-start gap-4">
+                            <div className="flex-1">
+                              <h3 className="font-medium text-medical-dark mb-1">{facility.name}</h3>
+                              <p className="text-sm text-gray-600 mb-2">{facility.address}</p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500">
+                                <span>{t('maps.type')}: {facility.type}</span>
+                                <span>{t('maps.distance')}: {facility.distance} km</span>
+                              </div>
                             </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex items-center gap-1 text-xs"
+                              onClick={() => openInGoogleMaps(facility)}
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              {t('maps.viewOnMap')}
+                            </Button>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex items-center gap-1 text-xs"
-                            onClick={() => openInGoogleMaps(facility)}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            {t('maps.viewOnMap')}
-                          </Button>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-8 text-center text-gray-500">
-                    <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>{t('maps.selectLocation')}</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Right column - Interactive Map */}
-          <div className="lg:col-start-2 lg:row-start-1">
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              <div className="p-4 border-b">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold text-medical-dark">{t('maps.interactiveMap')}</h2>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        if (map.current && userLocation) {
-                          map.current.setView([userLocation.latitude, userLocation.longitude], 15);
-                        }
-                      }}
-                      className="flex items-center gap-1"
-                    >
-                      <Navigation className="h-4 w-4" />
-                      {t('maps.myLocation')}
-                    </Button>
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                      <MapPin className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p>{t('maps.selectLocation')}</p>
+                    </div>
+                  )}
                 </div>
               </div>
-              
-              <div className="relative">
-                <div ref={mapRef} className="h-96 w-full" />
+            </div>
+
+            {/* Right column - Interactive Map */}
+            <div className="lg:col-start-2 lg:row-start-1">
+              <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <div className="p-4 border-b">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-medical-dark">{t('maps.interactiveMap')}</h2>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (map.current && userLocation) {
+                            map.current.setView([userLocation.latitude, userLocation.longitude], 15);
+                          }
+                        }}
+                        className="flex items-center gap-1"
+                      >
+                        <Navigation className="h-4 w-4" />
+                        {t('maps.myLocation')}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
                 
-                {/* Zoom Controls */}
-                <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-1">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-8 h-8 bg-white shadow-md"
-                    onClick={() => map.current?.zoomIn()}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-8 h-8 bg-white shadow-md"
-                    onClick={() => map.current?.zoomOut()}
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
+                <div className="relative">
+                  <div ref={mapRef} className="h-96 w-full" />
+                  
+                  {/* Zoom Controls */}
+                  <div className="absolute top-4 right-4 z-[1000] flex flex-col gap-1">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8 bg-white shadow-md"
+                      onClick={() => map.current?.zoomIn()}
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8 bg-white shadow-md"
+                      onClick={() => map.current?.zoomOut()}
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
