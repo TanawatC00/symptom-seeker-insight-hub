@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -140,7 +141,12 @@ const Maps = () => {
     }
   }, [selectedLocation]);
 
-  const handleLocationSelect = (location: Location) => {
+  const handleLocationSelect = (lat: number, lng: number, placeName: string) => {
+    const location: Location = {
+      name: placeName,
+      latitude: lat,
+      longitude: lng
+    };
     setSelectedLocation(location);
   };
 
@@ -222,8 +228,8 @@ const Maps = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        if (map && userLocation) {
-                          map.setView([userLocation.lat, userLocation.lng], 15);
+                        if (map.current && userLocation) {
+                          map.current.setView([userLocation.latitude, userLocation.longitude], 15);
                         }
                       }}
                       className="flex items-center gap-1"
@@ -244,7 +250,7 @@ const Maps = () => {
                     variant="outline"
                     size="icon"
                     className="w-8 h-8 bg-white shadow-md"
-                    onClick={() => map?.zoomIn()}
+                    onClick={() => map.current?.zoomIn()}
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
@@ -252,7 +258,7 @@ const Maps = () => {
                     variant="outline"
                     size="icon"
                     className="w-8 h-8 bg-white shadow-md"
-                    onClick={() => map?.zoomOut()}
+                    onClick={() => map.current?.zoomOut()}
                   >
                     <Minus className="h-4 w-4" />
                   </Button>
