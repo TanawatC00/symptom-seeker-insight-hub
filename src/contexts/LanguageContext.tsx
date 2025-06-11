@@ -58,6 +58,11 @@ const translations = {
     'maps.type': 'ประเภท',
     'maps.distance': 'ระยะทาง',
     'maps.selectLocation': 'เลือกตำแหน่งเพื่อค้นหาสถานพยาบาลใกล้เคียง',
+
+    // Footer
+    'footer.copyright': 'สงวนลิขสิทธิ์',
+    'footer.medicalDisclaimer': 'ข้อสงวนสิทธิ์ทางการแพทย์:',
+    'footer.disclaimerText': 'เครื่องมือนี้ให้ข้อมูลทั่วไปและไม่ใช่การทดแทนคำแนะนำทางการแพทย์จากผู้เชี่ยวชาญ โปรดปรึกษาผู้ให้บริการด้านสุขภาพสำหรับปัญหาทางการแพทย์เสมอ',
   },
   en: {
     // Home page
@@ -96,6 +101,11 @@ const translations = {
     'maps.type': 'Type',
     'maps.distance': 'Distance',
     'maps.selectLocation': 'Select a location to find nearby healthcare facilities',
+
+    // Footer
+    'footer.copyright': 'All rights reserved',
+    'footer.medicalDisclaimer': 'Medical Disclaimer:',
+    'footer.disclaimerText': 'This tool provides general information and is not a substitute for professional medical advice. Always consult healthcare providers for medical concerns.',
   }
 };
 
